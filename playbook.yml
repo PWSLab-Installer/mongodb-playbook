@@ -44,22 +44,22 @@
 
         
 
-    - name: Applying replacement on 20.04 or 8
-      lineinfile:
-            dest: /etc/mongod.conf
-            regexp: '^  authorization: disabled'
-            line: '  authorization: enabled'
-            state: present
+    # - name: Applying replacement on 20.04 or 8
+    #   lineinfile:
+    #         dest: /etc/mongod.conf
+    #         regexp: '^  authorization: disabled'
+    #         line: '  authorization: enabled'
+    #         state: present
 
-    - name: Restart Mongod
-      systemd:
-        state: restarted
-        name: mongod
+    # - name: Restart Mongod
+    #   systemd:
+    #     state: restarted
+    #     name: mongod
 
-    - mongodb_user:
-        database: admin
-        name: pwslab_admin
-        password: pwslab_admin
-        roles: readWrite,dbAdmin,userAdmin
-        state: present
+    # - mongodb_user:
+    #     database: admin
+    #     name: pwslab_admin
+    #     password: pwslab_admin
+    #     roles: readWrite,dbAdmin,userAdmin
+    #     state: present
 
