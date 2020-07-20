@@ -1,0 +1,55 @@
+---
+
+- name: Update Ubuntu cache
+  become: true
+  apt: name=curl state=present
+  when:
+      - os_check.stdout | regex_search("Ubuntu 20")
+
+- name: Add an apt key from ubuntu
+  command: wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | apt-key add -
+  when:
+    - os_check.stdout | regex_search("Ubuntu 20")
+
+- name: Add MongoDeb List
+  lineinfile:
+    path: /etc/yum.repos.d/mongodb-org.repo
+    line: "{{ item }}"
+    create: yes
+  loop:
+    - "[mongodb-org-4.2]"
+    - name=MongoDB Repository
+    - baseurl=https://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/4.2/x86_64/
+    - gpgcheck=1
+    - enabled=1
+    - gpgkey=https://www.mongodb.org/static/pgp/server-4.2.asc
+  when: 
+    - os_check.stdout | regex_search("CentOS Linux 8")
+
+- name: Add MongoDeb List
+  lineinfile:
+    path: /etc/apt/sources.list.d/mongodb-org-4.2.list
+    line: deb [ arch=amd64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.2 multiverse
+    create: yes
+  when: 
+    - os_check.stdout | regex_search("Ubuntu 20")
+
+- name: Install  Mongo
+  apt: name=mongodb-org update_cache=yes state=present
+  when:
+    - os_check.stdout | regex_search("Ubuntu 20")
+
+- name: install MongoDB
+  dnf:
+    name: mongodb-org
+    state: latest
+  when: 
+    - os_check.stdout | regex_search("CentOS Linux 8")
+
+- name: enable service mongod
+  systemd:
+    name: mongod
+    enabled: yes
+  when: 
+    - os_check.stdout | regex_search("CentOS Linux 8") or os_check.stdout | regex_search("Ubuntu 20")
+

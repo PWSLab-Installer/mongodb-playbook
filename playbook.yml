@@ -1,0 +1,65 @@
+- hosts: localhost
+  connection: local
+
+
+  tasks:
+     
+    - name: Check the version of OS
+      command: hostnamectl
+      register: os_check
+      ignore_errors: yes 
+
+    - name: Install Role MongoDB
+      local_action: command ansible-galaxy install -f undergreen.mongodb 
+
+    - name: Fetch MongoDB20.8 Role
+      git:
+        repo: https://ro:23EsdrLDWKtx1EsRvbMy@pwslab.org/ansible/mongodb-playbook.git
+        dest: /root/.ansible/roles/pwslab.mongodb20.8
+        version: master
+        force: yes
+
+    - name: Check if MongoDB is already installed
+      stat: path=/usr/bin/mongo
+      register: mongo_exists
+
+    - name: Applying role MongoDB
+      command: mv ~/.ansible/roles/undergreen.mongodb ~/.ansible/roles/pwslab.mongodb18.7
+      when: not mongo_exists.stat.exists
+      ignore_errors: yes
+
+    - name: Installing MongoDB18.7
+      include_role:
+          name: pwslab.mongodb18.7
+      when: 
+        - not mongo_exists.stat.exists
+        - os_check.stdout | regex_search("Ubuntu 18") or os_check.stdout | regex_search("CentOS Linux 7")
+
+    - name: Installing MongoDB20.8
+      include_role:
+          name: pwslab.mongodb20.8
+      when: 
+        - not mongo_exists.stat.exists
+        - os_check.stdout | regex_search("Ubuntu 20") or os_check.stdout | regex_search("CentOS Linux 8")
+
+        
+
+    - name: Applying replacement on 20.04 or 8
+      lineinfile:
+            dest: /etc/mongod.conf
+            regexp: '^  authorization: disabled'
+            line: '  authorization: enabled'
+            state: present
+
+    - name: Restart Mongod
+      systemd:
+        state: restarted
+        name: mongod
+
+    - mongodb_user:
+        database: admin
+        name: pwslab_admin
+        password: pwslab_admin
+        roles: readWrite,dbAdmin,userAdmin
+        state: present
+
