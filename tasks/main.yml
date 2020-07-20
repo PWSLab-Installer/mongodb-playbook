@@ -35,7 +35,7 @@
     - os_check.stdout | regex_search("Ubuntu 20")
 
 - name: Install  Mongo
-  apt: name=mongodb-org update_cache=yes state=present
+  apt: name=mongodb-org state=present
   when:
     - os_check.stdout | regex_search("Ubuntu 20")
 
