@@ -7,7 +7,7 @@
       - os_check.stdout | regex_search("Ubuntu 20")
 
 - name: Add an apt key from ubuntu
-  command: wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | apt-key add -
+  shell: wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | apt-key add -
   when:
     - os_check.stdout | regex_search("Ubuntu 20")
 
