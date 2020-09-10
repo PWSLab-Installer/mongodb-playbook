@@ -35,7 +35,10 @@
     - os_check.stdout | regex_search("Ubuntu 20")
 
 - name: Install  Mongo
-  apt: name=mongodb-org state=present
+  apt: 
+    name: mongodb-org 
+    update_cache: yes 
+    state: present
   when:
     - os_check.stdout | regex_search("Ubuntu 20")
 
@@ -49,6 +52,7 @@
 - name: enable service mongod
   systemd:
     name: mongod
+    state: started
     enabled: yes
   when: 
     - os_check.stdout | regex_search("CentOS Linux 8") or os_check.stdout | regex_search("Ubuntu 20")
